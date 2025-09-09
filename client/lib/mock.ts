@@ -42,3 +42,35 @@ export const MOCK_UPLOAD_HISTORY = [
   { id: "u_1003", fileName: "fsd_2024_schoolA.csv", rows: 1500, uploadedAt: "2024-09-21T08:05:00Z" },
   { id: "u_1004", fileName: "annual_2025.csv", rows: 1760, uploadedAt: "2025-01-09T09:40:00Z" },
 ] as const;
+
+export type GenderBySubject = {
+  subject: (typeof SUBJECTS)[number];
+  malePass: number;
+  maleFail: number;
+  femalePass: number;
+  femaleFail: number;
+};
+
+export const GENDER_BY_SUBJECT: GenderBySubject[] = [
+  { subject: "Math", malePass: 180, maleFail: 45, femalePass: 200, femaleFail: 30 },
+  { subject: "Science", malePass: 190, maleFail: 40, femalePass: 210, femaleFail: 28 },
+  { subject: "English", malePass: 220, maleFail: 25, femalePass: 240, femaleFail: 20 },
+  { subject: "Computer", malePass: 210, maleFail: 30, femalePass: 225, femaleFail: 18 },
+];
+
+export const GENDER_TOTALS = (() => {
+  const t = GENDER_BY_SUBJECT.reduce(
+    (acc, s) => {
+      acc.malePass += s.malePass;
+      acc.maleFail += s.maleFail;
+      acc.femalePass += s.femalePass;
+      acc.femaleFail += s.femaleFail;
+      return acc;
+    },
+    { malePass: 0, maleFail: 0, femalePass: 0, femaleFail: 0 },
+  );
+  return {
+    male: { pass: t.malePass, fail: t.maleFail },
+    female: { pass: t.femalePass, fail: t.femaleFail },
+  } as const;
+})();

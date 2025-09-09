@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Bar, BarChart } from "recharts";
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, Bar, BarChart, Pie, PieChart, Cell } from "recharts";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { MOCK_DATA, SUBJECTS, YEARS, type MetricKey, MOCK_UPLOAD_HISTORY } from "@/lib/mock";
+import { MOCK_DATA, SUBJECTS, YEARS, type MetricKey, MOCK_UPLOAD_HISTORY, GENDER_BY_SUBJECT, GENDER_TOTALS } from "@/lib/mock";
 import { toCSV, downloadTextFile } from "@/lib/export";
 import { toast } from "sonner";
 
@@ -74,6 +74,21 @@ export default function Dashboard() {
     }
     return best;
   }, [year, metric]);
+
+  const genderBars = useMemo(() => {
+    return GENDER_BY_SUBJECT.map((g) => ({
+      subject: g.subject,
+      malePass: g.malePass,
+      femalePass: g.femalePass,
+    }));
+  }, []);
+
+  const genderPie = useMemo(() => {
+    return [
+      { name: "Male Pass", value: GENDER_TOTALS.male.pass, fill: "#60a5fa" },
+      { name: "Female Pass", value: GENDER_TOTALS.female.pass, fill: "#f472b6" },
+    ];
+  }, []);
 
   return (
     <SiteLayout>
@@ -158,7 +173,7 @@ export default function Dashboard() {
                     <div className="text-muted-foreground">Simulated</div>
                     <div className="rounded-lg border p-3">
                       <div className="font-medium">Next-year {metric === "passRate" ? "Pass Rate" : "Average Score"}</div>
-                      <div className="mt-1 text-2xl font-extrabold">{Math.round((byYear.at(-1)?.value ?? 70) + (trend || 1))}%</div>
+                      <div className="mt-1 text-2xl font-extrabold">{Math.round(((byYear[byYear.length - 1]?.value) ?? 70) + (trend || 1))}%</div>
                       <div className="text-xs text-muted-foreground">Based on simple trend estimation</div>
                     </div>
                     <ul className="list-disc pl-5 text-sm">
@@ -173,6 +188,53 @@ export default function Dashboard() {
                       }}>Export CSV</Button>
                       <Button variant="outline" disabled className="cursor-not-allowed">Export PNG</Button>
                     </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pass by Gender (overall)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={{ male: { label: "Male", color: "#60a5fa" }, female: { label: "Female", color: "#f472b6" } }} className="h-[260px]">
+                      <PieChart>
+                        <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                        <Pie data={genderPie} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={2} stroke="transparent">
+                          {genderPie.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ChartContainer>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-md bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 p-2">Male: {GENDER_TOTALS.male.pass} pass / {GENDER_TOTALS.male.fail} fail</div>
+                      <div className="rounded-md bg-pink-50 text-pink-700 dark:bg-pink-500/10 dark:text-pink-300 p-2">Female: {GENDER_TOTALS.female.pass} pass / {GENDER_TOTALS.female.fail} fail</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }} className="xl:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Subject-wise Pass by Gender</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={{ malePass: { label: "Male Pass", color: "#60a5fa" }, femalePass: { label: "Female Pass", color: "#f472b6" } }} className="h-[260px]">
+                      <BarChart data={genderBars}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="subject" tickMargin={8} />
+                        <YAxis tickMargin={8} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="malePass" name="malePass" fill="var(--color-malePass)" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey="femalePass" name="femalePass" fill="var(--color-femalePass)" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ChartContainer>
                   </CardContent>
                 </Card>
               </motion.div>

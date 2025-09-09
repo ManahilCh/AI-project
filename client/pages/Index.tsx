@@ -14,7 +14,7 @@ export default function Index() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
-              className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg"
+              className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg bg-gradient-to-r from-cyan-200 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent animate-gradient"
             >
               AI Metric FSD Result Predictor (2021–2025)
             </motion.h1>
@@ -44,7 +44,7 @@ export default function Index() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 + i * 0.1 }}
-                  className="rounded-xl border border-white/20 bg-white/10 p-5 text-left backdrop-blur-md"
+                  className="rounded-xl border border-white/20 bg-white/10 p-5 text-left backdrop-blur-md transition-transform duration-300 hover:scale-[1.02] hover:border-white/40 hover:shadow-xl"
                 >
                   <div className="text-sm uppercase tracking-wider text-white/70">Feature</div>
                   <div className="mt-1 text-lg font-semibold">{label}</div>
